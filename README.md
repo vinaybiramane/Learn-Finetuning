@@ -1,4 +1,3 @@
-# peft-lab
 
 A hands-on lab for **understanding fine-tuning methods deeply** by running each one
 through an *identical* harness on a text-to-SQL task and comparing them apples-to-apples.
