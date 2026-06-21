@@ -1,5 +1,3 @@
-# peft-lab
-
 A hands-on lab for **understanding fine-tuning methods deeply** by running each one
 through an *identical* harness on a text-to-SQL task and comparing them apples-to-apples.
 It covers the **PEFT family** (LoRA, QLoRA, BitFit, IA3, prompt/prefix tuning) and the
@@ -59,6 +57,14 @@ in runnable cells. **numpy only, no GPU required.** Read them in order.
 | 17 | DPO vs RLHF | the reward model, the 3-stage recipe, and where PPO fits |
 | 18 | PPO | online policy-gradient, the KL leash, clipping |
 
+## The teaching skill (`skill/`)
+
+These notebooks were generated using a reusable **teaching skill** (`skill/SKILL.md`)
+that encodes a StatQuest-inspired method: define every term before using it, one small
+idea per step, tiny numbers worked by hand *then verified in a runnable cell*. The
+bundled `skill/scripts/build_notebook.py` builds a notebook and executes every code cell
+to confirm it runs before it ships. Reuse or adapt it for teaching any technical topic.
+
 ## Repo layout
 
 ```
@@ -72,6 +78,7 @@ train.py           SFT trainer (prompt-masked loss) + generation                
 preference.py      DPO and PPO trainers                                          (GPU)
 run.py             orchestrator: one command runs one method end-to-end
 demos/             the teaching notebooks (numpy only)
+skill/             the StatQuest-style teaching Skill used to build the notebooks
 ```
 
 The CPU-side modules are deliberately torch-free so the data, metric, and notebooks all
