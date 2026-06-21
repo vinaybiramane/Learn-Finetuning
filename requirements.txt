@@ -1,0 +1,13 @@
+# GPU side only (training). The CPU spine — config.py, data.py, eval_harness.py,
+# results_logger.py, sample_data/build_db.py — needs NONE of these and runs on a
+# plain Python 3.11 install locally.
+#
+# Install these in Kaggle/Colab (GPU runtime) before `python run.py --config ...`.
+# Versions left loose: TRL's DPO/PPO signatures drift, so pin only if a run breaks.
+torch>=2.1
+transformers>=4.44
+peft>=0.12
+trl>=0.9
+datasets>=2.18
+accelerate>=0.30
+bitsandbytes>=0.43      # QLoRA / 4-bit only; requires an NVIDIA GPU

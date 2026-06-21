@@ -1,0 +1,6 @@
+{"db_id": "store", "question": "How many customers are there?", "chosen": "SELECT COUNT(*) FROM customers", "rejected": "SELECT customers FROM COUNT"}
+{"db_id": "store", "question": "List the names of all customers.", "chosen": "SELECT name FROM customers", "rejected": "SELECT name FROM custmers"}
+{"db_id": "store", "question": "What is the total amount of all orders?", "chosen": "SELECT SUM(amount) FROM orders", "rejected": "SELECT amount FROM orders"}
+{"db_id": "store", "question": "How many customers are from Pune?", "chosen": "SELECT COUNT(*) FROM customers WHERE city = 'Pune'", "rejected": "SELECT COUNT(*) FROM customers"}
+{"db_id": "store", "question": "What is the average order amount?", "chosen": "SELECT AVG(amount) FROM orders", "rejected": "SELECT SUM(amount) FROM orders"}
+{"db_id": "store", "question": "How many orders have status 'shipped'?", "chosen": "SELECT COUNT(*) FROM orders WHERE status = 'shipped'", "rejected": "SELECT COUNT(*) FROM orders WHERE status = shipped"}

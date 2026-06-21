@@ -1,0 +1,23 @@
+# Python build artifacts
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Training outputs (large, machine-specific: adapters, checkpoints, logs)
+runs/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# OS cruft
+.DS_Store
+Thumbs.db
+
+# Local AI-assistant context / planning notes (kept private)
+CLAUDE.md

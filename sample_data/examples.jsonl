@@ -1,0 +1,14 @@
+{"db_id": "store", "question": "How many customers are there?", "gold_sql": "SELECT COUNT(*) FROM customers"}
+{"db_id": "store", "question": "List the names of all customers.", "gold_sql": "SELECT name FROM customers"}
+{"db_id": "store", "question": "What is the total amount of all orders?", "gold_sql": "SELECT SUM(amount) FROM orders"}
+{"db_id": "store", "question": "How many customers are from Pune?", "gold_sql": "SELECT COUNT(*) FROM customers WHERE city = 'Pune'"}
+{"db_id": "store", "question": "What is the average order amount?", "gold_sql": "SELECT AVG(amount) FROM orders"}
+{"db_id": "store", "question": "How many orders have status 'shipped'?", "gold_sql": "SELECT COUNT(*) FROM orders WHERE status = 'shipped'"}
+{"db_id": "store", "question": "List all distinct cities.", "gold_sql": "SELECT DISTINCT city FROM customers"}
+{"db_id": "store", "question": "What are the names of customers from Mumbai?", "gold_sql": "SELECT name FROM customers WHERE city = 'Mumbai'"}
+{"db_id": "store", "question": "What is the largest order amount?", "gold_sql": "SELECT MAX(amount) FROM orders"}
+{"db_id": "store", "question": "What is the smallest order amount?", "gold_sql": "SELECT MIN(amount) FROM orders"}
+{"db_id": "store", "question": "How many orders are there?", "gold_sql": "SELECT COUNT(*) FROM orders"}
+{"db_id": "store", "question": "List order amounts greater than 200.", "gold_sql": "SELECT amount FROM orders WHERE amount > 200"}
+{"db_id": "store", "question": "List customer names in alphabetical order.", "gold_sql": "SELECT name FROM customers ORDER BY name"}
+{"db_id": "store", "question": "What is the total order amount for shipped orders?", "gold_sql": "SELECT SUM(amount) FROM orders WHERE status = 'shipped'"}
