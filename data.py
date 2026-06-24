@@ -32,6 +32,17 @@ def split(examples: List[Dict], eval_fraction: float, seed: int
     return shuffled[n_eval:], shuffled[:n_eval]  # train, eval
 
 
+def load_split(cfg) -> Tuple[List[Dict], List[Dict]]:
+    """Return (train, eval). If cfg.eval_dataset_path is set (e.g. Spider's real
+    dev split), use it as eval and the whole dataset_path as train; otherwise hold
+    out a random slice of dataset_path. Keeps run.py's dispatch dataset-agnostic."""
+    examples = load_examples(cfg.dataset_path)
+    eval_path = getattr(cfg, "eval_dataset_path", "")
+    if eval_path:
+        return examples, load_examples(eval_path)
+    return split(examples, cfg.eval_fraction, cfg.seed)
+
+
 def load_schema(db_id: str, schema_dir: str = "sample_data/schemas") -> str:
     """Return a textual schema for the prompt. Falls back to a stub if the
     schema file is absent so the harness still runs end-to-end."""

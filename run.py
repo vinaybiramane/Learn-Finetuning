@@ -26,7 +26,7 @@ import argparse
 import data as datamod
 import eval_harness
 import results_logger
-from config import get_config, with_overrides
+from config import get_config, with_overrides, with_dataset, DEFAULT_RESULTS_CSV
 
 
 def main():
@@ -36,15 +36,17 @@ def main():
     ap.add_argument("--lora_alpha", type=int)
     ap.add_argument("--epochs", type=int)
     ap.add_argument("--name", help="override run name (for ablations)")
+    ap.add_argument("--data", default="sample", help="dataset: sample | spider")
     ap.add_argument("--show", action="store_true",
                     help="print comparison table and exit")
     args = ap.parse_args()
 
     if args.show or not args.config:
-        results_logger.print_comparison("results/comparison.csv")
+        results_logger.print_comparison(DEFAULT_RESULTS_CSV)
         return
 
     cfg = get_config(args.config)
+    cfg = with_dataset(cfg, args.data)          # point at sample or spider data
     overrides = {k: v for k, v in vars(args).items()
                  if k in {"lora_r", "lora_alpha", "epochs", "name"}
                  and v is not None}
@@ -65,8 +67,7 @@ def main():
 
     # --- OBJECTIVE DISPATCH: same model, same eval, different loss/data ----
     if cfg.objective == "sft":
-        examples = datamod.load_examples(cfg.dataset_path)
-        train_ex, eval_ex = datamod.split(examples, cfg.eval_fraction, cfg.seed)
+        train_ex, eval_ex = datamod.load_split(cfg)
         print(f"train={len(train_ex)}  eval={len(eval_ex)}")
         train_stats = train(model, tokenizer, train_ex, cfg)
 
@@ -74,15 +75,13 @@ def main():
         from preference import train_dpo
         pref = datamod.load_preference_examples(cfg.pref_dataset_path)
         # eval still uses the SFT (gold) set for execution accuracy
-        gold = datamod.load_examples(cfg.dataset_path)
-        _, eval_ex = datamod.split(gold, cfg.eval_fraction, cfg.seed)
+        _, eval_ex = datamod.load_split(cfg)
         print(f"preference pairs={len(pref)}  eval={len(eval_ex)}")
         train_stats = train_dpo(model, tokenizer, pref, cfg)
 
     elif cfg.objective == "ppo":
         from preference import train_ppo
-        examples = datamod.load_examples(cfg.dataset_path)
-        train_ex, eval_ex = datamod.split(examples, cfg.eval_fraction, cfg.seed)
+        train_ex, eval_ex = datamod.load_split(cfg)
         print(f"train={len(train_ex)}  eval={len(eval_ex)}  (execution reward)")
         train_stats = train_ppo(model, tokenizer, train_ex, cfg)
 

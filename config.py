@@ -9,8 +9,27 @@ Only the method-specific knobs change between runs.
 This module is intentionally torch-free so it imports instantly on your
 local 16GB box for inspecting / building configs without the GPU stack.
 """
+import os
 from dataclasses import dataclass, field, replace
 from typing import Tuple
+
+
+def _writable_base() -> str:
+    """Where run outputs (runs/, results/) should go.
+
+    Kaggle and Colab mount the *code* read-only (under /kaggle/input, /content),
+    so writing 'runs/' next to the code fails with a read-only-filesystem error.
+    Send outputs to the platform's writable dir instead; fall back to the current
+    directory locally (so local behaviour is unchanged)."""
+    for base in ("/kaggle/working", "/content"):
+        if os.path.isdir(base) and os.access(base, os.W_OK):
+            return base
+    return "."
+
+
+_OUTPUT_BASE = _writable_base()
+DEFAULT_RUNS_DIR = os.path.join(_OUTPUT_BASE, "runs")
+DEFAULT_RESULTS_CSV = os.path.join(_OUTPUT_BASE, "results", "comparison.csv")
 
 
 @dataclass
@@ -30,7 +49,9 @@ class ExperimentConfig:
     dataset_path: str = "sample_data/examples.jsonl"          # SFT: {db_id,question,gold_sql}
     pref_dataset_path: str = "sample_data/preferences.jsonl"  # DPO: {db_id,question,chosen,rejected}
     db_dir: str = "sample_data/dbs"
-    eval_fraction: float = 0.2          # held-out slice for execution accuracy
+    schema_dir: str = "sample_data/schemas"     # CREATE TABLE text injected into the prompt
+    eval_dataset_path: str = ""        # if set (e.g. Spider dev), used as eval instead of a random split
+    eval_fraction: float = 0.2          # held-out slice for execution accuracy (when no eval_dataset_path)
     max_seq_len: int = 1024
     seed: int = 42
 
@@ -63,8 +84,10 @@ class ExperimentConfig:
     # model needed. See data.py / eval_harness.execution_reward.
 
     # ---- output --------------------------------------------------------------
-    output_dir: str = "runs"
-    results_csv: str = "results/comparison.csv"
+    # Resolved to a WRITABLE location (e.g. /kaggle/working on Kaggle) so runs
+    # don't try to write next to read-only mounted code. Local: ./runs, ./results.
+    output_dir: str = DEFAULT_RUNS_DIR
+    results_csv: str = DEFAULT_RESULTS_CSV
 
 
 # ---------------------------------------------------------------------------
@@ -144,3 +167,36 @@ def get_config(name: str) -> ExperimentConfig:
 # Convenience for rank ablations: python run.py --config lora --lora_r 8
 def with_overrides(cfg: ExperimentConfig, **overrides) -> ExperimentConfig:
     return replace(cfg, **overrides)
+
+
+# ---------------------------------------------------------------------------
+# DATASETS — swap the data the harness runs on without touching any method.
+# `python run.py --config lora --data spider`. Build Spider first with
+# spider_loader.py. The mechanism/objective axes are unaffected.
+# ---------------------------------------------------------------------------
+DATASETS = {
+    "sample": {
+        "dataset_path": "sample_data/examples.jsonl",
+        "pref_dataset_path": "sample_data/preferences.jsonl",
+        "db_dir": "sample_data/dbs",
+        "schema_dir": "sample_data/schemas",
+        "eval_dataset_path": "",                       # random held-out slice
+    },
+    "spider": {
+        "dataset_path": "spider_data/train.jsonl",
+        # DPO pairs aren't generated for Spider yet (needs candidate sampling),
+        # so DPO on Spider would still read the sample pairs; SFT/PPO work fully.
+        "pref_dataset_path": "sample_data/preferences.jsonl",
+        "db_dir": "spider_data/dbs",
+        "schema_dir": "spider_data/schemas",
+        "eval_dataset_path": "spider_data/dev.jsonl",  # Spider's real dev split
+    },
+}
+
+
+def with_dataset(cfg: ExperimentConfig, name: str) -> ExperimentConfig:
+    if name not in DATASETS:
+        raise SystemExit(
+            f"Unknown dataset '{name}'. Available: {', '.join(DATASETS)}"
+        )
+    return replace(cfg, **DATASETS[name])

@@ -42,7 +42,7 @@ def _tokenize(examples, tokenizer, cfg):
     eos = tokenizer.eos_token_id
     rows = []
     for ex in examples:
-        schema = datamod.load_schema(ex["db_id"])
+        schema = datamod.load_schema(ex["db_id"], cfg.schema_dir)
         prompt, completion = datamod.build_supervised_text(ex, schema)
 
         prompt_ids = tokenizer(prompt, add_special_tokens=False).input_ids
@@ -121,7 +121,7 @@ def generate_predictions(model, tokenizer, eval_examples, cfg):
     preds = []
     t0 = time.time()
     for ex in eval_examples:
-        schema = datamod.load_schema(ex["db_id"])
+        schema = datamod.load_schema(ex["db_id"], cfg.schema_dir)
         prompt = datamod.format_prompt(ex["question"], schema)
         inputs = tokenizer(
             prompt, return_tensors="pt", truncation=True, max_length=cfg.max_seq_len

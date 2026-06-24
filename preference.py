@@ -26,7 +26,7 @@ def train_dpo(model, tokenizer, pref_examples, cfg):
 
     rows = []
     for ex in pref_examples:
-        schema = datamod.load_schema(ex["db_id"])
+        schema = datamod.load_schema(ex["db_id"], cfg.schema_dir)
         prompt, chosen, rejected = datamod.build_preference_text(ex, schema)
         rows.append({"prompt": prompt, "chosen": chosen, "rejected": rejected})
     ds = Dataset.from_list(rows)
@@ -92,7 +92,7 @@ def train_ppo(model, tokenizer, train_examples, cfg):
         for ex in train_examples:
             if step >= cfg.ppo_steps:
                 break
-            schema = datamod.load_schema(ex["db_id"])
+            schema = datamod.load_schema(ex["db_id"], cfg.schema_dir)
             prompt = datamod.format_prompt(ex["question"], schema)
             query_ids = tokenizer(prompt, return_tensors="pt").input_ids.to(device)
 

@@ -77,6 +77,7 @@ model_factory.py   builds the base model and applies one PEFT mechanism         
 train.py           SFT trainer (prompt-masked loss) + generation                 (GPU)
 preference.py      DPO and PPO trainers                                          (GPU)
 run.py             orchestrator: one command runs one method end-to-end
+spider_loader.py   convert the Spider benchmark into the lab's format            (CPU)
 demos/             the teaching notebooks (numpy only)
 skill/             the StatQuest-style teaching Skill used to build the notebooks
 ```
@@ -110,6 +111,14 @@ python run.py --show                               # comparison table
 ```
 
 Base model (fixed for fair comparison): `Qwen/Qwen2.5-Coder-1.5B-Instruct`.
+
+**Real data (Spider).** The bundled sample is a tiny smoke test. For a meaningful
+`exec_acc`, convert the Spider benchmark and pass `--data spider`:
+```bash
+python spider_loader.py --spider_dir /path/to/spider --out_dir spider_data \
+    --max_train 500 --max_eval 200
+python run.py --config lora --data spider     # eval on Spider's real dev split
+```
 
 ## Status
 
